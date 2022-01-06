@@ -1,0 +1,32 @@
+{
+    # redis address
+    "server" : "redis",
+    "port" : "6379",
+    "channels": [
+        "games"
+    ],
+
+    # should we fork() and become unix daemon?
+    "daemonize": 1,
+
+    # unprivileged system user to run bot as
+    "user" : "nobody",
+
+    # messages with commands will begin with this symbol
+    "csign": "!",
+
+    # logs goes there
+    "log" : "/var/log/aleesa-games/aleesa-games.log",
+    "loglevel": "info",
+
+    # ditto
+    "pid" : "/var/run/aleesa-games/aleesa-games.pid",
+
+    # maximal amount of message forwardings, to avoid endless loops
+    "forwards_max" : 5,
+
+    "gamestat" : {
+        "dir" : "data",
+        "gamestatdir" : "data/gamestat"
+    }
+}

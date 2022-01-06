@@ -1,0 +1,10 @@
+_Deparsed_XSubs.pm
+.idea/**
+.vscode/**
+.vstags
+*.pid
+*.log
+data/cache/**
+data/gamestat/**
+data/config.json
+vendor_perl/**
