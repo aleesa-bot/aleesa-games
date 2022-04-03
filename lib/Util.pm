@@ -1,6 +1,6 @@
 package Util;
 
-use 5.018;
+use 5.018; ## no critic (ProhibitImplicitImport)
 use strict;
 use warnings;
 use utf8;
@@ -8,7 +8,7 @@ use open qw (:std :utf8);
 use English qw ( -no_match_vars );
 
 use Digest::SHA qw (sha1_base64);
-use Encode;
+use Encode qw (encode_utf8);
 
 use version; our $VERSION = qw (1.0);
 use Exporter qw (import);

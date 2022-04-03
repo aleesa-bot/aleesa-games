@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use 5.018;
+use 5.018; ## no critic (ProhibitImplicitImport)
 use strict;
 use warnings;
 use utf8;
@@ -29,9 +29,10 @@ no Cwd;
 use Cwd::utf8 qw (chdir abs_path);
 use File::Basename qw (basename dirname);
 use File::Path qw (make_path);
+use File::Spec ();
 use Log::Any qw ($log);
-use Log::Any::Adapter;
-use Log::Any::For::Std;
+use Log::Any::Adapter ();
+use Log::Any::For::Std ();
 use POSIX qw (setgid setuid setsid);
 
 use Conf qw (LoadConf);
@@ -70,8 +71,8 @@ if ($UID == 0) {
 		make_path (
 			$piddir, {
 				uid   => $uid,
-				group => $gid
-			}
+				group => $gid,
+			},
 		);
 	}
 
@@ -82,8 +83,8 @@ if ($UID == 0) {
 			make_path (
 					$logdir, {
 							uid   => $uid,
-							group => $gid
-					}
+							group => $gid,
+					},
 			) or die "Unable to create $logdir: $OS_ERROR\n";
 		}
 	}
@@ -103,14 +104,14 @@ if (defined $logfile) {
 	# verbosity paticulary for CHI.
 	Log::Any::Adapter->set (
 		{
-			category => 'CHI::Driver'
+			category => 'CHI::Driver',
 		},
 		'File',
 		$logfile,
-		log_level => 'warn'
+		log_level => 'warn',
 	);
 } else {
-	Log::Any::Adapter->set ('File', '/dev/null');
+	Log::Any::Adapter->set ('File', File::Spec->devnull);
 }
 
 # По-умолчанию, демонизируемся, если явно не указано, что этого делать не надо
@@ -126,7 +127,7 @@ my $apath = abs_path $PROGRAM_NAME;
 unless (defined $apath) {
 	$log->fatal ("[FATAL] Unable to get abs_path: $OS_ERROR\n");
 	exit 1;
-};
+}
 
 my $pidfile = sprintf '%s/%s.pid', $piddir, basename $apath;
 $log->info ("[INFO] Creating pidfile at $pidfile");
@@ -152,7 +153,7 @@ $PROGRAM_NAME = abs_path $PROGRAM_NAME;              ## no critic (Variables::Re
 # И запустим уже наш сервис
 RunGames ();
 
-if (-f $pidfile) {
+if (-e $pidfile) {
 	unlink $pidfile;
 }
 
@@ -160,11 +161,11 @@ exit 0;
 
 sub daemonize {
 	__fork ();
-	POSIX::setsid ();
-	open STDIN, '<', '/dev/null';                    ## no critic (InputOutput::RequireCheckedSyscalls, InputOutput::RequireCheckedOpen)
+	setsid ();
+	open STDIN, '<', File::Spec->devnull;                    ## no critic (InputOutput::RequireCheckedSyscalls, InputOutput::RequireCheckedOpen)
 	# we handle STDOUT && STDERR via Log::Any::For::Std, so do not close them explicitly
-	#open STDOUT, '>', '/dev/null';                   ## no critic (InputOutput::RequireCheckedSyscalls, InputOutput::RequireCheckedOpen)
-	#open STDERR, '>', '/dev/null';                   ## no critic (InputOutput::RequireCheckedSyscalls, InputOutput::RequireCheckedOpen)
+	#open STDOUT, '>', File::Spec->devnull;                   ## no critic (InputOutput::RequireCheckedSyscalls, InputOutput::RequireCheckedOpen)
+	#open STDERR, '>', File::Spec->devnull;                   ## no critic (InputOutput::RequireCheckedSyscalls, InputOutput::RequireCheckedOpen)
 	__fork ();
 	umask 0;
 	return;
@@ -188,7 +189,7 @@ sub __fork {
 sub __signal_handler {
 	$log->info ("[INFO] Caught a signal $OS_ERROR");
 
-	if (-f $pidfile) {
+	if (-e $pidfile) {
 		unlink $pidfile;
 	}
 

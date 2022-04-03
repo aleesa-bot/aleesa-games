@@ -1,3 +1,4 @@
+## no critic
 requires 'Carp',                  '==1.50';
 requires 'Clone',                 '==0.45';
 requires 'Cwd::utf8',             '==0.011';
@@ -10,6 +11,7 @@ requires 'English',               '0';
 requires 'Exporter',              '==5.74';
 requires 'File::Basename',        '0';
 requires 'File::Path',            '==2.18';
+requires 'File::Spec',            '==3.75';
 requires 'JSON::XS',              '==4.03';
 requires 'Log::Any',              '==1.710';
 requires 'Log::Any::Adapter',     '==1.710';

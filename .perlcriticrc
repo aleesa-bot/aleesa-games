@@ -1,3 +1,18 @@
+#!/usr/bin/env perlcritic
+# Задействованные модули критика:
+#
+# Perl::Critic::More
+# Perl::Critic::Pulp
+# Perl::Critic::TooMuchCode
+# Perl::Critic::Lax
+# Perl::Critic::CognitiveComplexity
+# Perl::Critic::Policy::CompileTime
+# Perl::Critic::Policy::ProhibitImplicitImport
+# Perl::Critic::Policy::Dynamic::NoIndirect
+# Perl::Critic::StricterSubs
+# Perl::Critic::Policy::ProhibitImplicitImport
+# Perl::Critic::Policy::CodeLayout::RequireUseUTF8
+
 [-CodeLayout::RequireTidyCode]
 [-ValuesAndExpressions::ProhibitMagicNumbers]
 [-ControlStructures::ProhibitUnlessBlocks]
@@ -15,3 +30,13 @@
 [-RegularExpressions::ProhibitEscapedMetacharacters]
 [-InputOutput::RequireBriefOpen]
 [-Modules::ProhibitExcessMainComplexity]
+[-Editor::RequireEmacsFileVariables]
+[-TooMuchCode::ProhibitUnnecessaryUTF8Pragma]
+[-ValuesAndExpressions::RequireConstantOnLeftSideOfEquality]
+[-Lax::RequireConstantOnLeftSideOfEquality::ExceptEq]
+[-Lax::ProhibitEmptyQuotes::ExceptAsFallback]
+[-TooMuchCode::ProhibitDuplicateLiteral]
+[-CodeLayout::RequireASCII]
+[-ErrorHandling::RequireUseOfExceptions]
+[-Miscellanea::ProhibitUnrestrictedNoCritic]
+[-ValuesAndExpressions::RestrictLongStrings]

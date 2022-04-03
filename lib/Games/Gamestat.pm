@@ -1,12 +1,12 @@
 package Games::Gamestat;
 # Stores and calculates player stats for games
 
-use 5.018;
+use 5.018; ## no critic (ProhibitImplicitImport)
 use strict;
 use warnings;
 use utf8;
 use open qw (:std :utf8);
-use DBI;
+use DBI ();
 use English qw ( -no_match_vars );
 use File::Path qw (make_path);
 use Mojo::Util qw (trim);

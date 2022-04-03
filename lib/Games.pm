@@ -1,7 +1,7 @@
 package Games;
 
 # Общие модули - синтаксис, кодировки итд
-use 5.018;
+use 5.018; ## no critic (ProhibitImplicitImport)
 use strict;
 use warnings;
 use utf8;
@@ -9,14 +9,13 @@ use open qw (:std :utf8);
 
 # Модули для работы приложения
 use Clone qw (clone);
-use Data::Dumper;
+use Data::Dumper qw (Dumper);
 use Log::Any qw ($log);
-use Math::Random::Secure qw (irand);
 # Чтобы "уж точно" использовать hiredis-биндинги, загрузим этот модуль перед Mojo::Redis
-use Protocol::Redis::XS;
-use Mojo::Redis;
-use Mojo::IOLoop;
-use Mojo::IOLoop::Signal;
+use Protocol::Redis::XS ();
+use Mojo::Redis ();
+use Mojo::IOLoop ();
+use Mojo::IOLoop::Signal ();
 
 use Conf qw (LoadConf);
 use Games::Archeologist qw (Dig);
@@ -99,7 +98,7 @@ my $parse_message = sub {
 
 	if (defined $answer->{message}) {
 		$self->json ($send_to)->notify (
-			$send_to => $answer
+			$send_to => $answer,
 		);
 	}
 
@@ -110,7 +109,7 @@ my $__signal_handler = sub {
 	my ($self, $name) = @_;
 	$log->info ("[INFO] Caught a signal $name");
 
-	if (defined $main::pidfile && -f $main::pidfile) {
+	if (defined $main::pidfile && -e $main::pidfile) {
 		unlink $main::pidfile;
 	}
 
@@ -123,7 +122,7 @@ sub RunGames {
 	$log->info ("[INFO] Connecting to $c->{server}, $c->{port}");
 
 	my $redis = Mojo::Redis->new (
-		sprintf 'redis://%s:%s/1', $c->{server}, $c->{port}
+		sprintf 'redis://%s:%s/1', $c->{server}, $c->{port},
 	);
 
 	$log->info ('[INFO] Registering connection-event callback');
@@ -140,11 +139,11 @@ sub RunGames {
 					my ($conn, $error) = @_;
 					$log->error ("[ERROR] Redis connection error: $error");
 					return;
-				}
+				},
 			);
 
 			return;
-		}
+		},
 	);
 
 	my $pubsub = $redis->pubsub;
@@ -155,13 +154,13 @@ sub RunGames {
 		$log->debug ("[DEBUG] Subscribing to $channel");
 
 		$sub->{$channel} = $pubsub->json ($channel)->listen (
-			$channel => sub { $parse_message->(@_); }
+			$channel => sub { $parse_message->(@_); },
 		);
 	}
 
 	Mojo::IOLoop::Signal->on (
 		TERM => $__signal_handler,
-		INT  => $__signal_handler
+		INT  => $__signal_handler,
 	);
 
 	do { Mojo::IOLoop->start } until Mojo::IOLoop->is_running;
