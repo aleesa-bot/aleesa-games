@@ -11,8 +11,6 @@ use open qw (:std :utf8);
 use Clone qw (clone);
 use Data::Dumper qw (Dumper);
 use Log::Any qw ($log);
-# Чтобы "уж точно" использовать hiredis-биндинги, загрузим этот модуль перед Mojo::Redis
-use Protocol::Redis::XS ();
 use Mojo::Redis ();
 use Mojo::IOLoop ();
 use Mojo::IOLoop::Signal ();
@@ -26,7 +24,11 @@ use Exporter qw (import);
 our @EXPORT_OK = qw (RunGames);
 
 my $c = LoadConf ();
-my $fwd_cnt = $c->{'forward_max'} // 5;
+my $fwd_cnt = 5;
+
+if (defined $c->{'forward_max'}) {
+	$fwd_cnt = $c->{'forward_max'};
+}
 
 # Основной парсер
 my $parse_message = sub {
@@ -37,6 +39,18 @@ my $parse_message = sub {
 	$answer->{message} = undef;
 
 	if (defined $answer->{misc}) {
+		unless (defined $answer->{misc}->{answer}) {
+			$answer->{misc}->{answer} = 1;
+		}
+
+		unless (defined $answer->{misc}->{bot_nick}) {
+			$answer->{misc}->{bot_nick} = '';
+		}
+
+		unless (defined $answer->{misc}->{csign}) {
+			$answer->{misc}->{csign} = $c->{csign};
+		}
+
 		unless (defined $answer->{misc}->{fwd_cnt}) {
 			$answer->{misc}->{fwd_cnt} = 1;
 		} else {
@@ -49,17 +63,25 @@ my $parse_message = sub {
 			}
 		}
 
-		unless (defined $answer->{misc}->{answer}) {
-			$answer->{misc}->{answer} = 1;
+		unless (defined $answer->{misc}->{good_morning}) {
+			$answer->{misc}->{good_morning} = 0;
 		}
 
-		unless (defined $answer->{misc}->{csign}) {
-			$answer->{misc}->{csign} = '!';
+		unless (defined $answer->{misc}->{msg_format}) {
+			$answer->{misc}->{msg_format} = 0;
+		}
+
+		unless (defined $answer->{misc}->{username}) {
+			$answer->{misc}->{username} = '';
 		}
 	} else {
-		$answer->{misc}->{answer} = 1;
-		$answer->{misc}->{csign} = '!';
-		$answer->{misc}->{msg_format} = 0;
+		$answer->{misc}->{answer}       = 1;
+		$answer->{misc}->{bot_nick}     = '';
+		$answer->{misc}->{csign}        = $c->{csign};
+		$answer->{misc}->{fwd_cnt}      = 1;
+		$answer->{misc}->{good_morning} = 0;
+		$answer->{misc}->{msg_format}   = 0;
+		$answer->{misc}->{username}     = '';
 	}
 
 	my $send_to = $m->{plugin};
@@ -67,8 +89,8 @@ my $parse_message = sub {
 	$log->debug ('[DEBUG] Incoming message ' . Dumper ($m));
 
 	# Пробуем найти команды. Сообщения, начинающиеся с $answer->{misc}->{csign}
-	if (substr ($m->{message}, 0, 1) eq $answer->{misc}->{csign}) {
-		my $cmd = substr $m->{message}, 1;
+	if (substr ($m->{message}, 0, length ($answer->{misc}->{csign})) eq $answer->{misc}->{csign}) {
+		my $cmd = substr $m->{message}, length ($answer->{misc}->{csign});
 		my @cmds = qw (fish fishing рыба рыбка рыбалка);
 		my $bingo = 0;
 
@@ -158,10 +180,8 @@ sub RunGames {
 		);
 	}
 
-	Mojo::IOLoop::Signal->on (
-		TERM => $__signal_handler,
-		INT  => $__signal_handler,
-	);
+	Mojo::IOLoop::Signal->on (TERM => $__signal_handler);
+	Mojo::IOLoop::Signal->on (INT  => $__signal_handler);
 
 	do { Mojo::IOLoop->start } until Mojo::IOLoop->is_running;
 	return;

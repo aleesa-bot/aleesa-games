@@ -13,7 +13,7 @@ aleesa-games
 
 Ответ направляется в redis-канал, указанный в поле plugin входящего сообщения.
 
-Формат протокола - см README от aleesa-misc.
+Формат протокола - см README от aleesa-misc-go.
 
 
 Как это запустить?
@@ -33,5 +33,6 @@ development tools - gcc, gcc-g++, perl-devel, make, cmake и так далее.
 В каталоге contrib находится скрипт для alpine linux, системы инициализации openrc. Этот скрипт достаточно положить В
 /etc/init.d/aleesa-games сконфигурить сервис по инструкции выше и после этого сервис запускается командой:
 service aleesa-games start
-в автозагрузку его можно прописать через команду
+
+в автозагрузку его можно прописать через команду:
 rc-update add aleesa-games default
